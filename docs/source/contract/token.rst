@@ -290,7 +290,7 @@ The ``add_balance`` function checks that the amount added cannot be negative. If
 
 The ``sub_balance`` function checks that the reduced balance must be positive, the reduced account exists and needs sufficient balance. After the check is passed, the corresponding account balance is reduced.
 
-See complete code in https://github.com/fractal-platform/fractal-contracts.
+See complete code in https://github.com/fractal-platform/fractal-contract/tree/v0.1.x.
 
 Step5. Deploy and test smart contract
 ----------------------------------------

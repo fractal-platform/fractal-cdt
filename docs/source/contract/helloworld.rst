@@ -6,7 +6,7 @@ Step 1. Setup build environment
 
 You can find two ways to setup the build environment for fractal contract development.
 
- | 1. Download pre-build cdt zip-files from http://www.github.com/fractal-platform/.
+ | 1. Download pre-build cdt zip-files from https://github.com/fractal-platform/fractal-cdt/releases
 
  | 2. Build cdt tools from source, reference http://www.github.com/fractal-platform/fractal-cdt for more details.
 
