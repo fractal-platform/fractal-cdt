@@ -1,7 +1,7 @@
 Token Contract
 ================
 
-In previous articles, we have learned some basic syntax and data persistence of smart contracts. In this chapter, we will introduce a token contract, which can publish different tokens.
+In previous articles, we have learned some basic syntax and data persistence of smart contracts. In this chapter, we will introduce token contract, which can publish different tokens.
 
 Step1. Create token.hpp
 ----------------------------
@@ -20,10 +20,10 @@ In the header file, you need to include the necessary system header file and dec
 
     public:
 
-    priviate:
+    private:
     }
 
-Step2. Declare necessary table
+Step2. Declare table
 ------------------------------
 
 In the token contract, we need a table to record the contract information. First, the table stat is responsible for recording the information of token, including the name of token, the total amount and the dispatcher.
@@ -41,7 +41,7 @@ In the token contract, we need a table to record the contract information. First
 
     typedef table<"stat"_n,stat> stats;
 
-Table account is responsible for recording the number of tokens held by each user. This contract can publish multiple tokens, therefore, the address of user and the symbol of token are combined, used as the primary key for account table.
+Table account is responsible for recording the number of tokens held by each user. This contract can publish multiple tokens, therefore, the combination of user address and token symbol, serves as the primary key of the account table.
 
 .. code-block:: C
 
@@ -55,40 +55,40 @@ Table account is responsible for recording the number of tokens held by each use
 
     typedef table<"account"_n, account> accounts;
 
-Step3. Declare necessary action
+Step3. Declare action
 ---------------------------------
 
-First, declare an action to create tokens called ``create``. Users call this action to publish their own token. The required parameter is a variable of type asset, which defines the token's label and total amount.
+First, declare an action ``create`` to create tokens. Users call this action to publish their own token. The required parameter is a variable of type asset, which defines the token's label and total amount.
 
 .. code-block:: c
 
     [[ftl::action]]
     void create(asset maximum_supply);
 
-Then, declare an action to issue tokens called ``issue``. This action issues tokens to some user. The required parameter is the user's address it wants to issue tokens to and the amount of tokens.
+Then, declare an action ``issue`` to issue tokens. This action issues tokens to user. The required parameter is the recipient's address and the amount of tokens.
 
 .. code-block:: C
 
     [[ftl::action]]
     void issue(vector<uint8_t> to,asset quantity);
 
-Declare an action to retire tokens from some user called ``retire``. This action retires tokens from some user and burns them.
-The required parameter is the user's address it wants to retire tokens from and the amount of tokens.
+Declare an action ``retire`` to retire user's tokens. This action retires tokens from some user and purges them.
+The required parameter is the user's address and the amount of tokens.
 
 .. code-block:: C
 
     [[ftl::action]]
     void retire(vector<uint8_t> from, asset quantity);
 
-Declare an action to transfer tokens to some user called ``transfer``. User calls this action to transfer tokens to designated user.
-The required parameter is the user's address it wants to transfer tokens to and the amount of tokens.
+Declare an action ``transfer`` to transfer tokens to user. User calls this action to transfer tokens to designated recipient.
+The required parameter is the recipient's address and the amount of tokens.
 
 .. code-block:: C
 
     [[ftl::action]]
     void transfer (vector<uint8_t> to, asset quantity);
 
-Now the head file is as following:
+Now the complete header file shown is as follows:
 
 .. code-block:: C
 
@@ -138,7 +138,7 @@ Now the head file is as following:
     };
 
 
-Step4. Achieve actions
+Step4. Perform actions
 -----------------------
 ``create`` token.cpp and include token.cpp.
 
@@ -164,7 +164,7 @@ Step4. Achieve actions
         });
     }
 
-First, call ``get_from_address`` function to get the caller of the action. Next, check the name of the newly defined token, the validity of the amount and whether the name of token already exists in this contract. After all checks are passed, the new token informations are recorded in the table stat and the caller is set to be issuer.
+First, call ``get_from_address`` function to get the caller of the action. Next, check the name of the newly defined token, the validity of the amount and whether the name of token already exists in this contract. After all checks are passed, the new token information is recorded in the table stat and the caller is set to be the issuer.
 
 *issue*
 
@@ -194,7 +194,7 @@ First, call ``get_from_address`` function to get the caller of the action. Next,
     }
 
 
-``issue`` checks whether the name of the input asset is valid and in the table stat. Next, check whether the user calling the issue method has permission to issue the specified token. Check whether the input asset is valid and its amount is greater than zero. Check whether the name of the input asset is the same as the asset name found in stat. Check whether there is sufficient balance to issue token. After verification, the amount of money already issued in stat is increased, and the token is issued to the specified user using the `add_balance` function.
+``issue`` verifies whether the name of the input asset is valid and exists in the table stat. Next, check whether the user calling the issue method has permission to issue the specified token. Check whether the input asset is valid and its amount is greater than zero. Check whether the name of the input asset is the same as the asset name found in stat. Check whether there is sufficient balance to issue token. After all the above verification, the amount of token issued in stat is increased, and the token is issued to the specified user using the `add_balance` function.
 
 *retire*
 
@@ -237,9 +237,9 @@ First, call ``get_from_address`` function to get the caller of the action. Next,
         add_balance(to, quantity);
     }
 
-``transfer`` checks that the outgoing account is not same with the inward account. Check the validity of the input asset, whether the amount is greater than 0, and whether the name is the name found from the table of stat. Check through, transfer account reduces the corresponding amount, transfer account increases the corresponding amount.
+``transfer`` checks that the outbound account is not same as the inbound account. Check the validity of the input asset, whether the amount is greater than zero, and whether the name is the name found from the table of stat. After all the checks, outbound account deducts the corresponding amount and inbound account increases the corresponding amount.
 
-In order to achieve the transfer of tokens, it is necessary to realize the increase and decrease functions of account balance, ``add_balance`` and ``sub_balance``.
+To transfer tokens, we need to implement the account balance addition and subtraction functions, ``add_balance`` and ``sub_balance``.
 
 *add_balance*
 
@@ -265,7 +265,7 @@ In order to achieve the transfer of tokens, it is necessary to realize the incre
         }
     }
 
-The ``add_balance`` function checks that the amount added cannot be negative. If the added account exists then increases its balance else set the balance to be increased amount.
+The ``add_balance`` function verifies that the amount added is positive. If the account exists then increases its balance else set the balance to be increased amount.
 
 *sub_balance*
 
@@ -288,28 +288,28 @@ The ``add_balance`` function checks that the amount added cannot be negative. If
         });
     }
 
-The ``sub_balance`` function checks that the reduced balance must be positive, the reduced account exists and needs sufficient balance. After the check is passed, the corresponding account balance is reduced.
+The ``sub_balance`` function verifies that the reduced balance is positive, the account exists and has sufficient balance. After the check is passed, the corresponding account balance is decreased.
 
 See complete code in https://github.com/fractal-platform/fractal-contract/tree/v0.1.x.
 
 Step5. Deploy and test smart contract
 ----------------------------------------
 
-To deploy and test smart contract, you should construct a fractal chain locally or link to fractal test network.
+To deploy and test smart contract, you should construct a fractal chain locally or link it to the fractal test network.
 
-Learn how to create private chain or link to fractal test network, `click here`_.
+Learn how to create private chain and link to fractal test network, `click here`_.
 
 .. _`click here`: https://fractal-doc.readthedocs.io/en/latest/
 
 Here we use gtool to deploy and call contract locally.
 
-a). Fistly, deploy token contract. To ensure deploy successfully, the address you used to deploy contract should has enough balances.
+a). Deploy token contract. To ensure successful deployment, the address you used to deploy contract should have enough balance.
 
 .. code-block:: bash
 
     gtool tx --rpc http://127.0.0.1:8545 --chainid 999 --keys data1/keys/ --pass 666 --wasm ./token.wasm deploy
 
-Then you can get the contract address in console. And check whether deploy the contract successfully using following code.
+Then you can get the contract address from the console. Check contract deployment status using following command.
 
 .. code-block:: bash
 
@@ -321,7 +321,7 @@ b). Create your own token ``CAT``
 
     gtool tx --rpc http://127.0.0.1:8545 --chainid 999 --keys data1/keys/ --pass 666 --to $CONTRACTADDR --abi token.abi --action create --args '["1000000000000.0000 CAT"]' call
 
-Then checkout if you have successfully created token ``CAT``.
+Then verify whether you have successfully created token ``CAT``.
 
 .. code-block:: bash
 
@@ -333,7 +333,7 @@ c). Issue 100.0000 ``CAT`` to your own address.
 
     gtool tx --rpc http://127.0.0.1:8545 --chainid 999 --keys data1/keys/ --pass 666 --to $CONTRACTADDR --abi token.abi --action issue --args '["$YOURADDR"，"100.0000 CAT"]' call
 
-Checkout if you have recieved the tokens successfully. Not that, here, the key used to look up users' accounts is combined with address you are looking for with the encode of the token's type.
+Verify that you have received the tokens successfully. Note that, here the key used to look up user's account is the combination of the address you are looking for encoded in the token's type.
 
 .. code-block:: bash
 
@@ -345,10 +345,10 @@ d). Retire 10.0000 ``CAT`` from your address.
 
     gtool tx --rpc http://10.1.1.169:8545 --chainid 999 --keys data1/keys/ --pass 666 --to $CONTRACTADDR --abi token.abi --action issue --args '["$YOURADDR","10.0000 CAT"]' call
 
-e). Transfer 10.0000 to some address.
+e). Transfer 10.0000 ``CAT``.
 
 .. code-block:: bash
 
     gtool tx --rpc http://10.1.1.169:8545 --chainid 999 --keys data1/keys/ --pass 666 --to $CONTRACTADDR --abi token.abi --action tranfer --args '["$USERADDR2"，"10.0000 CAT"]' call
 
-Note that, the format of $CONTRACTADDR is 0xXXXXX, and the address of user not have "0x".
+Note that, the format of $CONTRACTADDR is 0xXXXXX, while user address does not have "0x".
