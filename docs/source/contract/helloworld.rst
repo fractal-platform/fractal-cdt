@@ -4,7 +4,7 @@ Hello World!
 Step 1. Setup build environment
 --------------------------------
 
-You can find two ways to setup the build environment for fractal contract development.
+There are two ways to setup the build environment for fractal contract development.
 
  | 1. Download pre-build cdt zip-files from https://github.com/fractal-platform/fractal-cdt/releases
 
@@ -30,19 +30,19 @@ Create a new directory called "hello", and create a new file named "hello.cpp".
     cd hello
     touch hello.cpp
 
-Below the ``contract.hpp`` header file is included. The contract.hpp file includes a few classes required to write a smart contract.
+Include the ``contract.hpp`` header file, which import several classes that are required to write a smart contract.
 
 .. code-block:: CPP 
 
     #include <ftllib/contract.hpp>
 
-Using the ftl namespace will reduce clutter in your code.
+Using the ftl namespace will de-clutter your code.
 
 .. code-block:: CPP 
 
     using namespace ftl;
 
-Create a standard C++ class. The contract class needs to extend ``ftl::contract`` class which is defined in the ``contract.hpp`` file.
+Create a standard C++ class. The contract class needs to extend ``ftl::contract`` class which is defined in the ``contract.hpp`` header file.
 
 .. code-block:: C 
 
@@ -50,7 +50,7 @@ Create a standard C++ class. The contract class needs to extend ``ftl::contract`
 
     class [[ftl::contract]] hello : public ftl::contract {};
 
-The ``using`` declaration will allow us to write more concise code.
+The ``using`` declaration allows us to write more concise code.
 
 .. code-block:: C 
 
@@ -62,7 +62,7 @@ The ``using`` declaration will allow us to write more concise code.
     public:
     };
 
-An empty contract doesn't do much good. Add a public access specifier and a using-declaration. 
+An empty contract wouldn't do any good. Add a public access specifier and a using-declaration.
 
 .. code-block:: C 
 
@@ -78,13 +78,13 @@ An empty contract doesn't do much good. Add a public access specifier and a usin
         }
     };
 
-The above action accepts a parameter called ``user`` that's a ``std:string type``. 
+The above action accepts a parameter called ``user`` that's a ``std:string`` type.
 
-As is, the ABI GLOSSARY:ABI generator in ``fractal-cpp`` won't know about the hi() action without an attribute. Add a C++ style attribute above the action, this way the abi generator can produce more reliable output.
+As is, the ABI GLOSSARY:ABI generator in ``fractal-cpp`` won't be able to call the hi() action without an attribute. Add a C++ style attribute above the action, this allows the abi generator to produce a more reliable output.
 
 Finally, dispatch the action in smart contract.
 
-Everything together, here's the completed hello world contract head file dispatcher.hpp should be included in and use ``FTL_DISPATCH`` to dispatcher actions.
+Put everything together, here's the complete hello world contract. Header file dispatcher.hpp should be included and use ``FTL_DISPATCH`` to dispatch actions.
 
 .. code-block:: C 
 
@@ -112,7 +112,7 @@ You can compile your code to web assembly (.wasm) as follows:
 
     fractal-cpp -o hello.wasm hello.cpp
 
-Above command generates two file hello.wasm and hello.abi. hello.wasm is the file for web assembly byte code, and hello.abi is the api description file for contract.
+The above command generates two files, hello.wasm and hello.abi. hello.wasm is the web assembly byte code, and hello.abi is the interface for the contract.
 
 Step 4. Test contract code
 ------------------------------
