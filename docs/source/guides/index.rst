@@ -20,7 +20,7 @@ Setup Fractal CDT Environment
 
     mkdir ~/fractal-test
     cd ~/fractal-test
-    mv 
+    mv <download path> fractal-cdt-bin.<os>.v0.2.0.tgz
     tar zxvf fractal-cdt-bin.<os>.v0.2.0.tgz
 
 .. hint:: You should change the filename if you download a package with new version.
@@ -30,14 +30,15 @@ Setup Fractal CDT Environment
 .. code-block:: bash 
 
     cd ~/fractal-test
-    . setenv.sh
+    . fractal-cdt-bin/setenv.sh
 
 5. Test installation. Run these commands in terminal:
 
 .. code-block:: bash 
 
     cd ~/fractal-test
-    fractal-cpp -h
+    . fractal-cdt-bin/setenv.sh
+    fractal-cpp --help
 
 If you get command help in terminal, it means that your installation is OK.
 
@@ -128,8 +129,7 @@ You can compile your code to web assembly (.wasm) as follows:
 
 .. code-block:: bash 
 
-    cd ~/fractal-test
-    . setenv.sh
+    . ~/fractal-test/fractal-cdt-bin/setenv.sh
     fractal-cpp -o hello.wasm hello.cpp
 
 Above command generates two file hello.wasm and hello.abi. hello.wasm is the file for web assembly byte code, and hello.abi is the api description file for contract.

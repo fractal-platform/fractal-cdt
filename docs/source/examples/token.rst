@@ -294,7 +294,7 @@ The ``add_balance`` function checks that the amount added cannot be negative. If
 
 The ``sub_balance`` function checks that the reduced balance must be positive, the reduced account exists and needs sufficient balance. After the check is passed, the corresponding account balance is reduced.
 
-See complete code in https://github.com/fractal-platform/fractal-contract/tree/v0.1.x.
+See complete code in https://github.com/fractal-platform/fractal-contract/.
 
 Step5. Compile and deploy smart contract
 ----------------------------------------
@@ -303,8 +303,7 @@ You can compile your code to web assembly (.wasm) as follows:
 
 .. code-block:: bash 
 
-    cd ~/fractal-test
-    . setenv.sh
+    . ~/fractal-test/fractal-cdt-bin/setenv.sh
     fractal-cpp -I. -o token.wasm token.cpp
 
 You can deploy your smart contract by wallet:
