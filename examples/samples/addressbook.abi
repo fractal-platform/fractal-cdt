@@ -1,0 +1,87 @@
+{
+    "____comment": "This file was generated automatically. DO NOT EDIT ",
+    "version": "ftl::abi/0.3.0",
+    "structs": [
+        {
+            "name": "erase",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "insert",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first_name",
+                    "type": "string"
+                },
+                {
+                    "name": "last_name",
+                    "type": "string"
+                },
+                {
+                    "name": "city",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "modify",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first_name",
+                    "type": "string"
+                },
+                {
+                    "name": "last_name",
+                    "type": "string"
+                },
+                {
+                    "name": "city",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "person",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first_name",
+                    "type": "string"
+                },
+                {
+                    "name": "last_name",
+                    "type": "string"
+                },
+                {
+                    "name": "city",
+                    "type": "string"
+                }
+            ]
+        }
+    ],
+    "types": [],
+    "actions": [
+        {
+            "name": "erase",
+            "type": "erase"
+        },
+        {
+            "name": "insert",
+            "type": "insert"
+        },
+        {
+            "name": "modify",
+            "type": "modify"
+        }
+    ],
+    "tables": [
+        {
+            "name": "p",
+            "key_type": "address",
+            "value_type": "person"
+        }
+    ]
+}

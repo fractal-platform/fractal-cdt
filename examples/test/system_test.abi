@@ -1,0 +1,38 @@
+{
+    "____comment": "This file was generated with fractal-abigen. DO NOT EDIT ",
+    "version": "ftl::abi/0.3.0",
+    "types": [],
+    "structs": [
+        {
+            "name": "test1",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "test2",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "test3",
+            "base": "",
+            "fields": []
+        }
+    ],
+    "actions": [
+        {
+            "name": "test1",
+            "type": "test1"
+        },
+        {
+            "name": "test2",
+            "type": "test2"
+        },
+        {
+            "name": "test3",
+            "type": "test3"
+        }
+    ],
+    "tables": [],
+    "variants": []
+}

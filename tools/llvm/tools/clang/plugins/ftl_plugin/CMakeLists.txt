@@ -1,0 +1,1 @@
+add_llvm_loadable_module(ftl_plugin ftl_autogen.cpp PLUGIN_TOOL clang)

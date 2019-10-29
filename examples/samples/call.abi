@@ -1,0 +1,87 @@
+{
+    "____comment": "This file was generated automatically. DO NOT EDIT ",
+    "version": "ftl::abi/0.3.0",
+    "structs": [
+        {
+            "name": "test1",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first_name",
+                    "type": "string"
+                },
+                {
+                    "name": "last_name",
+                    "type": "string"
+                },
+                {
+                    "name": "city",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "test2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first_name",
+                    "type": "string"
+                },
+                {
+                    "name": "last_name",
+                    "type": "string"
+                },
+                {
+                    "name": "city",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "test3",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first_name",
+                    "type": "string"
+                },
+                {
+                    "name": "last_name",
+                    "type": "string"
+                },
+                {
+                    "name": "city",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "test4",
+            "base": "",
+            "fields": []
+        }
+    ],
+    "types": [],
+    "actions": [
+        {
+            "name": "test1",
+            "type": "test1"
+        },
+        {
+            "name": "test2",
+            "type": "test2"
+        },
+        {
+            "name": "test3",
+            "type": "test3"
+        },
+        {
+            "name": "test4",
+            "type": "test4"
+        }
+    ],
+    "tables": [],
+    "variants": [],
+    "abi_extensions": []
+}

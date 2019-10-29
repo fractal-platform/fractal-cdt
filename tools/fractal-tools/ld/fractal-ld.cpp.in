@@ -1,0 +1,46 @@
+// Declares clang::SyntaxOnlyAction.
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include <iostream>
+#include <sstream>
+
+// Declares llvm::cl::extrahelp.
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/FileSystem.h"
+using namespace clang::tooling;
+using namespace llvm;
+#define ONLY_LD
+#include <compiler_options.hpp>
+
+int main(int argc, const char **argv) {
+
+  cl::SetVersionPrinter([](llvm::raw_ostream& os) {
+        os << "fractal-ld version " << "${VERSION_FULL}" << "\n";
+  });
+  cl::ParseCommandLineOptions(argc, argv, "fractal-ld (WebAssembly linker)");
+  Options opts = CreateOptions();
+
+  if (!ftl::environment::exec_subprogram("wasm-ld", opts.ld_options))
+     return -1;
+
+  if ( !llvm::sys::fs::exists( opts.output_fn ) ) {
+     return -1;
+  }
+
+  // finally any post processing
+  #ifdef _WIN32
+     if ( !llvm::sys::fs::exists( opts.pp_dir+"/fractal-pp.exe" ) ) {
+	#else
+     if ( !llvm::sys::fs::exists( opts.pp_dir+"/fractal-pp" ) ) {
+	#endif
+        std::cout << "Error: fractal-pp not found! (Try reinstalling fractal-cdt)" << std::endl;
+        return -1;
+     }
+     if (!ftl::environment::exec_subprogram("fractal-pp", {opts.output_fn}))
+        return -1;
+     if ( !llvm::sys::fs::exists( opts.output_fn ) ) {
+        return -1;
+     }
+  return 0;
+}

@@ -1,0 +1,219 @@
+// Declares clang::SyntaxOnlyAction.
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/DeclTemplate.h"
+#include "clang/AST/Expr.h"
+#include "clang/Basic/Builtins.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+#include "clang/Rewrite/Frontend/Rewriters.h"
+#include "llvm/Support/FileSystem.h"
+
+#include <ftl/abigen.hpp>
+
+#include <iostream>
+#include <sstream>
+
+// Declares llvm::cl::extrahelp.
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Path.h"
+
+using namespace clang::tooling;
+using namespace llvm;
+
+#define CPP_COMP 1
+#define COMPILER_NAME "fractal-cpp"
+#include <compiler_options.hpp>
+
+#include <set>
+#include <sstream>
+
+using namespace clang::tooling;
+using namespace clang::ast_matchers;
+using namespace llvm;
+using namespace ftl;
+
+namespace ftl {
+   DeclarationMatcher function_decl_matcher = cxxMethodDecl().bind("ftl_tool");
+   DeclarationMatcher record_decl_matcher   = cxxRecordDecl().bind("ftl_tool");
+   DeclarationMatcher typedef_decl_matcher  = typedefDecl().bind("ftl_tool");
+   auto               class_tmp_matcher     = classTemplateSpecializationDecl().bind("ftl_tool");
+
+   abigen& get_abigen_ref() {
+      static abigen ag;
+      return ag;
+   }
+
+   class FtlMethodMatcher : public MatchFinder::MatchCallback {
+      public:
+         virtual void run( const MatchFinder::MatchResult& res ) {
+            if (const clang::CXXMethodDecl* decl = res.Nodes.getNodeAs<clang::CXXMethodDecl>("ftl_tool")->getCanonicalDecl()) {
+               abi abi;
+               if (decl->isFtlAction() && abigen::is_ftl_contract(decl, get_abigen_ref().get_contract_name())) {
+                  get_abigen_ref().add_struct(decl);
+                  get_abigen_ref().add_action(decl);
+                  auto params = decl->parameters();
+                  for (auto param : params) {
+                     get_abigen_ref().add_type(param->getType());
+                  }
+               }
+            }
+         }
+   };
+
+   class FtlRecordMatcher : public MatchFinder::MatchCallback {
+      public:
+         virtual void run( const MatchFinder::MatchResult& res ) {
+            if (const clang::CXXRecordDecl* decl = res.Nodes.getNodeAs<clang::CXXRecordDecl>("ftl_tool")) {
+               if (decl->isFtlAction() && abigen::is_ftl_contract(decl, get_abigen_ref().get_contract_name())) {
+                  get_abigen_ref().add_struct(decl);
+                  get_abigen_ref().add_action(decl);
+                  for (auto field : decl->fields()) {
+                     get_abigen_ref().add_type( field->getType() );
+                  }
+               }
+               if (decl->isFtlTable() && abigen::is_ftl_contract(decl, get_abigen_ref().get_contract_name())) {
+                  get_abigen_ref().add_table(decl);
+                  for (auto field : decl->fields()) {
+                     get_abigen_ref().add_type(field->getType());
+                  }
+               }
+            }
+         }
+   };
+} // namespace ftl
+
+void generate(const std::vector<std::string>& base_options, std::string input, std::string contract_name) {
+   std::vector<std::string> options;
+   options.push_back("fractal-cpp");
+   options.push_back(input); // don't remove oddity of CommonOptionsParser?
+   options.push_back(input);
+   options.push_back("--");
+   for (size_t i=0; i < base_options.size(); i++) {
+      options.push_back(base_options[i]);
+   }
+   //options.push_back("-v");
+   options.push_back("--target=wasm32");
+   options.push_back("-nostdlib");
+   options.push_back("-ffreestanding");
+   options.push_back("-fno-builtin");
+   options.push_back("-fno-rtti");
+   options.push_back("-fno-exceptions");
+   options.push_back("-I${Boost_INCLUDE_DIRS}");
+   options.push_back("-DBOOST_DISABLE_ASSERTS");
+   options.push_back("-DBOOST_EXCEPTION_DISABLE");
+   options.push_back("-Wno-everything");
+   options.push_back("-std=c++17");
+   options.push_back(std::string("-I")+ftl::whereami::where()+"/../include/libcxx");
+   options.push_back(std::string("-I")+ftl::whereami::where()+"/../include/libc");
+   options.push_back(std::string("-I")+ftl::whereami::where()+"/../include");
+
+   int size = options.size();
+   const char** new_argv = new const char*[size];
+   for (size_t i=0; i < size; i++)
+      new_argv[i] = options[i].c_str();
+
+   CommonOptionsParser opts( size, new_argv, FtlCompilerToolCategory, 0 );
+   ClangTool ctool(opts.getCompilations(), opts.getSourcePathList());
+
+   get_abigen_ref().set_contract_name(contract_name);
+
+   FtlMethodMatcher ftl_method_matcher;
+   FtlRecordMatcher ftl_record_matcher;
+   MatchFinder finder;
+
+   finder.addMatcher(function_decl_matcher, &ftl_method_matcher);
+   finder.addMatcher(record_decl_matcher, &ftl_record_matcher);
+   finder.addMatcher(class_tmp_matcher, &ftl_record_matcher);
+
+   int tool_run = -1;
+   tool_run = ctool.run(newFrontendActionFactory(&finder).get());
+   if (tool_run != 0) {
+      throw std::runtime_error("abigen error");
+   }
+   if (!get_abigen_ref().is_empty()) {
+      // write to abi file
+      std::string abi_file = replace_extension(input, ".abi");
+      std::ofstream abi_stream(abi_file);
+      abi_stream << pretty_print(get_abigen_ref().to_json());
+      abi_stream.close();
+   }
+}
+
+int main(int argc, const char **argv) {
+   // show version
+   for (int i=0; i < argc; i++) {
+     if (argv[i] == std::string("-v")) {
+       std::cout << COMPILER_NAME << " version " << "${VERSION_FULL}" << "\n";
+       return 0;
+     }
+   }
+   cl::SetVersionPrinter([](llvm::raw_ostream& os) {
+       os << COMPILER_NAME << " version " << "${VERSION_FULL}" << "\n";
+   });
+
+   cl::ParseCommandLineOptions(argc, argv, std::string(COMPILER_NAME)+" (Fractal C++ -> WebAssembly compiler)");
+   Options opts = CreateOptions();
+
+   std::vector<std::string> outputs;
+   try {
+      for (auto input : opts.inputs) {
+         std::vector<std::string> new_opts = opts.comp_options;
+         SmallString<64> res;
+         llvm::sys::path::system_temp_directory(true, res);
+         std::string tmp_file = std::string(res.c_str())+"/"+llvm::sys::path::filename(input).str();
+         std::string output;
+
+         generate(opts.comp_options, input, opts.abigen_contract);
+
+         if (llvm::sys::fs::exists(tmp_file)) {
+            input = tmp_file;
+         }
+         output = tmp_file+".o";
+
+         new_opts.insert(new_opts.begin(), input);
+
+         if (!opts.link) {
+            output = opts.output_fn.empty() ? "a.out" : opts.output_fn;
+         }
+
+         new_opts.insert(new_opts.begin(), "-o "+output);
+         outputs.push_back(output);
+
+         if (!ftl::environment::exec_subprogram("clang-7", new_opts)) {
+            llvm::sys::fs::remove(tmp_file);
+            return -1;
+         }
+         llvm::sys::fs::remove(tmp_file);
+      }
+   } catch (std::runtime_error& err) {
+      llvm::errs() << err.what() << '\n';
+      return -1;
+   }
+
+   if (opts.link) {
+      std::vector<std::string> new_opts = opts.ld_options;
+      for (auto input : outputs) {
+         new_opts.insert(new_opts.begin(), std::string(" ")+input+" ");
+      }
+
+      if (!ftl::environment::exec_subprogram("fractal-ld", new_opts)) {
+         for (auto input : outputs) {
+            llvm::sys::fs::remove(input);
+         }
+         return -1;
+      }
+      for (auto input : outputs) {
+         llvm::sys::fs::remove(input);
+      }
+      if ( !llvm::sys::fs::exists( opts.output_fn ) ) {
+         return -1;
+      }
+   }
+
+  return 0;
+}
