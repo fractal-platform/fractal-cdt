@@ -1,7 +1,7 @@
 Data Persistence
 ================
 
-To learn about data persistence, write a simple smart contract that functions as a roster. Fractal system use a map struct to store data.
+Fractal system uses map struct to store data. In this section, you will learn data persistence with fractal and write a simple smart contract that works as a roster.
 
 Step 1. Write a fractal contract class
 -------------------------------------------
@@ -13,7 +13,7 @@ Create a new directory called "roster", and create a new file named "roster.cpp"
     cd roster
     touch roster.cpp
 
-In a previous tutorial, you created a hello world contract and you learned the basics. You will be familiar with the structure below, the class has been named ``roster`` respectively.
+In the previous tutorial, you created a basic hello world contract. You should be now familiar with the structure below, although the class has been renamed to ``roster``.
 
 .. code-block:: C 
 
@@ -30,15 +30,15 @@ In a previous tutorial, you created a hello world contract and you learned the b
 
 Step 2. Create the data structure for the table
 ------------------------------------------------
-Before a table can be configured and instantiated, a struct that represents the data structure of the roster needs to be written. Since it's an roster, the table will contain members, so create a ``struct`` called "member".
+Before a table can be configured and instantiated, a struct that represents the data structure of the roster needs to be created. Since it's a roster, which is a table that consists of members, so we create a ``struct`` called "member".
 
 .. code-block:: CPP 
 
     struct member{};
 
-When defining the structure of a map table, you will require a unique value to use as the primary key.
+Since it is a mapping table, it needs a unique value to server as the primary key.
 
-For this contract, use a field called "name" with type address. This contract will have one unique entry per user, so this key will be a consistent and guaranteed unique value based on the user's address.
+For this contract, use a field called "name" with type ``address``. This contract has one unique entry per user, so this key, which is based on the user's address will serve as a consistent and guaranteed unique key value.
 
 .. code-block:: CPP 
 
@@ -48,7 +48,7 @@ For this contract, use a field called "name" with type address. This contract wi
         } key;
     }
 
-Since this contract is a roster it probably should store some relevant details for each member.
+Since this contract is a roster it probably should store some other relevant member details.
 
 .. code-block:: CPP 
 
@@ -64,7 +64,7 @@ Since this contract is a roster it probably should store some relevant details f
 
 Step 3. Configure the table
 ----------------------------------------
-Now that the data structure of the table has been defined with a struct we need to configure the table. The ``ftl::table`` constructor needs to be named and configured to use the struct we previously defined.
+Now we configure the table. The ``ftl::table`` constructor needs to be named and configured to use the struct we previously defined.
 
 .. code-block:: CPP 
 
@@ -72,11 +72,11 @@ Now that the data structure of the table has been defined with a struct we need 
 
 With the above configuration there is a table named member, that
 
-  | 1. Uses the _n operator to define an ftl::name type and uses that to name the table. Note that the table's name should be same with the struct name.
+  | 1. Uses the _n operator to define an ftl::name type and uses that to name the table. Note that the table's name should be the same as the struct name.
  
-  | 2. Pass in the singular member struct defined in the previous step.
+  | 2. Passes in the singular member struct defined in the previous step.
 
-  | 3. Declare this table's type. This type will be used to instantiate this table later.
+  | 3. Declares this table's type. This type will be used to instantiate the table later.
 
 So far, our file should look like this.
 
@@ -104,22 +104,22 @@ So far, our file should look like this.
 Step 4. The constructor
 -----------------------
 
-When working with C++ classes, the first public method you should create is a constructor.
+As in any other C++ class, the first public method you should create is the constructor.
 
-Our constructor will be responsible for initially setting up the contract.
+Our constructor is responsible to initialize the contract.
 
-ftl contracts extend the ``contract`` class. Initialize our parent contract class with the data stream which used to serialize data.
+ftl contract extends the ``contract`` class. Initialize our parent contract class with the data stream which is used to serialize data.
 
 .. code-block:: C++
 
     roster(datastream<const char*> ds):contract(ds) {}
 
-Step 5. Adding and modify the table
+Step 5. Update the table
 -----------------------------------
 
-This section defines an action for the user to add or update a record. This action will need to accept any values that this action needs to be able to emplace (create) or modify.
+This section defines an action for the user to add or update a record. This action is able to accept any value to emplace (create) or modify itself.
 
-Firstly, this method accepts an address type argument and asserts that the account executing the transaction equals the provided value.
+First, this method accepts an address type argument and asserts that the account executing the transaction equals to the provided value.
 
 .. code-block:: CPP
     
@@ -131,7 +131,7 @@ Firstly, this method accepts an address type argument and asserts that the accou
         std::string situation
     ) {}
 
-Then instantiate the table defined above.
+Then it instantiates the table defined above.
 
 .. code-block:: CPP
 
@@ -140,7 +140,7 @@ Then instantiate the table defined above.
     }
 
 Next, insert or update a row in table with the method ``emplace``. This function will 
-update the row in the table if the element has existed otherwise insert it into table.
+update the row in the table if the element exists otherwise insert it into table.
 
 .. code-block:: CPP 
 
@@ -155,12 +155,12 @@ update the row in the table if the element has existed otherwise insert it into 
         });
     }
 
-The ``roster`` contract now has a functional action that will enable a user to create a row in the table if that record does not yet exist, and modify it if it already exists.
+The ``roster`` contract now has a functional action that will enable a user to create a row in the table if that record does not exist or modify it if it already exists.
 
 Step 6. Remove record from the table
 -------------------------------------
 
-This section will tell you how to remove a row from table. Similar to previous step. create a public method in the ``roster`` and instantiate the table.
+This section introduce how to remove a row from table. Similar to previous step, first create a public method in the ``roster`` and instantiate the table.
 
 .. code-block:: CPP 
 
@@ -168,17 +168,17 @@ This section will tell you how to remove a row from table. Similar to previous s
         member_list mems;
     }
 
-Checkout if the record indeed exists in the table before erasing.
+Verify that the record indeed exists in the table before erasing.
 
 .. code-block:: CPP 
 
     void erase(address user){
         member_list mems;
         bool exist = mems.has_key(user);
-        checkout(exist == false, "Record does not exist");
+        verify(exist == false, "Record does not exist");
     }
 
-Then,call the ``erase`` method to erase the record.
+Then, call the ``erase`` method to erase the record.
 
 .. code-block:: CPP 
 
@@ -189,7 +189,7 @@ Then,call the ``erase`` method to erase the record.
         mems.erase(user);
     }
 
-Now you can create, modify and erase records form table.
+Now you can create, modify and erase records.
 
 Step 7. Preparing for the ABI
 ------------------------------
@@ -197,9 +197,9 @@ Step 7. Preparing for the ABI
 7.1 ABI action declarations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To generate ABI file, it requires some declarations.
+ABI file requires declarations.
 
-Above both the ``upsert`` and ``erase`` functions add the following C++ declaration:
+In the previous section, both the ``upsert`` and ``erase`` functions make the following C++ declaration:
 
 .. code-block:: C++
 
@@ -210,7 +210,7 @@ The above declaration will extract the arguments of the action and create necess
 7.2 ABI table declarations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Add an ABI declaration to the table. Modify the following line defined in the private region of your contract:
+Add an ABI declaration to the table. Modify the following line defined in the private section of your contract:
 
 .. code-block:: C++
     
@@ -224,7 +224,7 @@ To this:
 
 Now our contract is ready to be compiled.
 
-Below is the final state of our ``roster`` contract:
+Below is the final code of our ``roster`` contract:
 
 .. code-block:: C 
 
@@ -298,7 +298,7 @@ Insert or update a record:
 
     wasmtest --wasm roster.wasm --abi roster.abi --action upsert --args '["Wang","male","26","1993-7-1","student"]' exec
 
-Romove a record:
+Remove a record:
 
 .. code-block:: bash
 
